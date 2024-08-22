@@ -1,20 +1,20 @@
 package route
 
 import (
-	"fmt"
+	"backend/internal/delivery/http"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type RouteConfig struct {
-	App *fiber.App
+	App            *fiber.App
+	UserController *http.UserController
 }
 
 func (r *RouteConfig) Setup() {
+	r.SetupAuthRoute()
+}
 
-	r.App.Get("/", func(c *fiber.Ctx) error {
-		body := c.Query("name")
-		return c.SendString(fmt.Sprintf("Hello, %s!", body))
-	})
-
+func (r *RouteConfig) SetupAuthRoute() {
+	r.App.Post("/v1/user/create", r.UserController.Create)
 }

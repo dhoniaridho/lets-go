@@ -1,0 +1,42 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "contact": {},
+    "version": "0.1.0",
+    "title": "API",
+    "description": "Test"
+  },
+  "host": "localhost:2000",
+  "schemes": ["http", "https"],
+  "paths": {
+    "/v1/user/create": {
+      "post": {
+        "description": "Test",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

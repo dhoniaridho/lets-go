@@ -1,19 +1,24 @@
 package main
 
 import (
+	_ "backend/docs"
 	"backend/internal/config"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
 
 	app := fiber.New()
 
+	db := config.NewDatabase()
+
 	config.Bootstrap(
 		&config.BootstrapConfig{
 			App: app,
+			DB:  db,
 		},
 	)
 
@@ -22,5 +27,15 @@ func main() {
 		log.Printf("Route mapped: %s %s\n", route.Method, route.Path)
 	}
 
-	app.Listen(":3000")
+	// setup cors
+
+	app.Use(cors.New(
+		cors.Config{
+			AllowOrigins: "*",
+			AllowHeaders: "*",
+			AllowMethods: "*",
+		},
+	))
+
+	app.Listen(":2000")
 }
