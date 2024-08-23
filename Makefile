@@ -14,3 +14,8 @@ migrate-down:
 
 migration:
 	goose -dir ./db/migrations create $(name) sql
+
+jwk:
+	go run cmd/jwk/main.go
+	@echo "JWK_PUBLIC=$$(cat public.jwk)" >> .env
+	@echo "JWK_PRIVATE=$$(cat private.jwk)" >> .env

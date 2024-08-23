@@ -21,13 +21,16 @@ func Bootstrap(config *BootstrapConfig) {
 
 	// setup use cases
 	userUseCase := usecase.NewUserUsecase(config.DB, userRepository)
+	authUseCase := usecase.NewAuthUseCase(config.DB, userRepository)
 
 	// setup controllers
 	userController := http.NewUserController(userUseCase)
+	authController := http.NewAuthController(authUseCase)
 
 	routeConfig := route.RouteConfig{
 		App:            config.App,
 		UserController: userController,
+		AuthController: authController,
 	}
 
 	routeConfig.Setup()

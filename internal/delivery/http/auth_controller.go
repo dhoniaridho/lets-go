@@ -17,5 +17,18 @@ func NewAuthController(usecase *usecase.AuthUsecase) *AuthController {
 }
 
 func (c *AuthController) SignIn(ctx *fiber.Ctx) error {
-	return ctx.SendString("Hello, World!")
+	r, err := c.UseCase.SignIn()
+
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(
+		fiber.Map{
+			"message": "success",
+			"data":    r,
+		},
+	)
 }
