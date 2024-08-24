@@ -18,8 +18,8 @@ func (r *Repository[T]) Delete(t *T) error {
 	return r.DB.Delete(t).Error
 }
 
-func (r *Repository[T]) First(t *T) error {
-	return r.DB.First(t).Error
+func (r *Repository[T]) First(t *T, conditions interface{}) error {
+	return r.DB.Where(conditions).First(t).Error
 }
 
 func (r *Repository[T]) Find(t *T) error {

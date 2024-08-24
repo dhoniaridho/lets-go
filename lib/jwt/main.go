@@ -58,7 +58,10 @@ func Sign() (string, error) {
 }
 
 // verify function to validate JWT using JWK
-func Verify(tokenString, jwkPublicBase64 string) (jwt.Token, error) {
+func Verify(tokenString string) (jwt.Token, error) {
+
+	jwkPublicBase64 := os.Getenv("JWK_PUBLIC")
+
 	// Decode the Base64-encoded JWK
 	jwkPublicJSON, err := base64.StdEncoding.DecodeString(jwkPublicBase64)
 	if err != nil {
@@ -71,7 +74,7 @@ func Verify(tokenString, jwkPublicBase64 string) (jwt.Token, error) {
 		return nil, fmt.Errorf("failed to parse public JWK: %v", err)
 	}
 
-	verifiedToken, err := jwt.Parse([]byte(tokenString), jwt.WithKey(jwa.RS256, publicJWK))
+	verifiedToken, err := jwt.Parse([]byte(tokenString), jwt.WithKey(jwa.ES384, publicJWK))
 	if err != nil {
 		fmt.Printf("failed to verify JWS: %s\n", err)
 		return nil, err

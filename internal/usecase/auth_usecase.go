@@ -6,8 +6,11 @@ import (
 	"backend/internal/repositories"
 	"backend/lib/jwt"
 	"errors"
+	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -25,21 +28,73 @@ func NewAuthUseCase(db *gorm.DB, UserRepository *repositories.UserRepository, Va
 	}
 }
 
-func (u *AuthUsecase) SignIn(data *models.SignInRequest) (string, error) {
-	var user entities.User
-
-	err := u.UserRepository.First(&user)
+func (u *AuthUsecase) SignIn(data *models.SignInRequest) (*models.SignInResponse, error) {
+	user := new(entities.User)
+	err := u.UserRepository.First(user, map[string]interface{}{"email": data.Email})
 
 	if err != nil {
-		return "", errors.New("user not found")
+		return nil, errors.New(
+			"invalid credentials",
+		)
 	}
 
 	token, err := jwt.Sign()
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return token, nil
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
 
+	if err != nil {
+		return nil, errors.New("invalid credentials")
+	}
+
+	return &models.SignInResponse{
+		Token: token,
+		User: models.User{
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+		},
+	}, nil
+
+}
+
+func (u *AuthUsecase) SignUp(
+	data *models.SignUpRequest,
+) (*models.SignUpRequest, error) {
+
+	user := u.UserRepository.First(&entities.User{
+		Email: data.Email,
+	}, map[string]interface{}{"email": data.Email})
+
+	if user == nil {
+		return data, errors.New("user already exists")
+	}
+	key, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+
+	if err != nil {
+		return data, err
+	}
+
+	create := u.UserRepository.Create(&entities.User{
+		ID:        uuid.NewString(),
+		Email:     data.Email,
+		Name:      data.Name,
+		Password:  string(key),
+		CreatedAt: time.Now(),
+	})
+
+	if create != nil {
+		return data, create
+	}
+
+	return data, nil
+}
+
+func (u *AuthUsecase) GetProfile(id string) (*entities.User, error) {
+	user := new(entities.User)
+	err := u.UserRepository.First(user, map[string]interface{}{"id": id})
+	return user, err
 }

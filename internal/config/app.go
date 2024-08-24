@@ -2,6 +2,7 @@ package config
 
 import (
 	"backend/internal/delivery/http"
+	"backend/internal/delivery/http/middleware"
 	"backend/internal/delivery/http/route"
 	"backend/internal/repositories"
 	"backend/internal/usecase"
@@ -29,10 +30,13 @@ func Bootstrap(config *BootstrapConfig) {
 	userController := http.NewUserController(userUseCase)
 	authController := http.NewAuthController(authUseCase)
 
+	authMiddleware := middleware.NewAuth()
+
 	routeConfig := route.RouteConfig{
 		App:            config.App,
 		UserController: userController,
 		AuthController: authController,
+		AuthMiddlewre:  authMiddleware,
 	}
 
 	routeConfig.Setup()

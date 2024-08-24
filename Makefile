@@ -6,7 +6,7 @@ run:
 build-web:
 	go build -o dist/app.exe cmd/web/main.go
 
-migrate-up:
+migrate:
 	goose -dir ./db/migrations postgres $(DB_URL) up
 
 migrate-down:
