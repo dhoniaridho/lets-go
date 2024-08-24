@@ -17,21 +17,23 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	app := fiber.New()
-
-	db := config.NewDatabase()
-
-	config.Bootstrap(
-		&config.BootstrapConfig{
-			App: app,
-			DB:  db,
+	app := fiber.New(
+		fiber.Config{
+			// Prefork:           true,
+			EnablePrintRoutes: true,
 		},
 	)
 
-	// Log all mapped routes
-	for _, route := range app.GetRoutes() {
-		log.Printf("Route mapped: %s %s\n", route.Method, route.Path)
-	}
+	db := config.NewDatabase()
+	v := config.NewValidator()
+
+	config.Bootstrap(
+		&config.BootstrapConfig{
+			App:       app,
+			DB:        db,
+			Validator: v,
+		},
+	)
 
 	// setup cors
 

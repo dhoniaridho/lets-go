@@ -1,6 +1,10 @@
 {
   "swagger": "2.0",
   "info": {
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
     "contact": {},
     "version": "0.1.0",
     "title": "API",
@@ -9,8 +13,11 @@
   "host": "localhost:2000",
   "schemes": ["http", "https"],
   "paths": {
-    "/v1/user/create": {
+    "/v1/auth/sign-in": {
       "post": {
+        "security": [],
+        "operationId": "Create",
+        "summary": "Create user",
         "description": "Test",
         "parameters": [
           {
@@ -24,6 +31,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
@@ -36,6 +46,7 @@
         "name": {
           "type": "string"
         }
+
       }
     }
   }

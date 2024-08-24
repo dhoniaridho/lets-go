@@ -1,7 +1,9 @@
 package http
 
 import (
+	"backend/internal/models"
 	"backend/internal/usecase"
+	"backend/internal/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,7 +19,18 @@ func NewAuthController(usecase *usecase.AuthUsecase) *AuthController {
 }
 
 func (c *AuthController) SignIn(ctx *fiber.Ctx) error {
-	r, err := c.UseCase.SignIn()
+
+	request := new(models.SignInRequest)
+	ctx.BodyParser(request)
+
+	res, err := utils.ValidateBody(c.UseCase.Validate, request)
+
+	if err != nil {
+		println("Validation error: ", err)
+		return ctx.Status(res.Status).JSON(res)
+	}
+
+	r, err := c.UseCase.SignIn(request)
 
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -26,9 +39,14 @@ func (c *AuthController) SignIn(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(
-		fiber.Map{
-			"message": "success",
-			"data":    r,
-		},
+		utils.BuildResponse(
+			&utils.Response{
+				Data: map[string]interface{}{
+					"token": r,
+				},
+				Message: "success",
+				Status:  fiber.StatusOK,
+			},
+		),
 	)
 }
