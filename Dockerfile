@@ -7,6 +7,7 @@ ENV CGO_ENABLED=0
 ENV GOOS=linux
 ENV GOARCH=amd64
 ENV PORT=3000
+ENV PREFORK=true
 
 RUN apk add make
 COPY . .

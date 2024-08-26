@@ -13,6 +13,8 @@ import (
 func main() {
 
 	viper.SetConfigFile(".env")
+	viper.SetDefault("PORT", "3000")
+	viper.SetDefault("PREFORK", false)
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {             // Handle errors reading the config file
 		panic(fmt.Errorf("fatal error config file: %w", err))
@@ -20,7 +22,7 @@ func main() {
 
 	app := fiber.New(
 		fiber.Config{
-			// Prefork:           true,
+			Prefork:           viper.GetBool("PREFORK"),
 			EnablePrintRoutes: true,
 		},
 	)
@@ -45,8 +47,6 @@ func main() {
 			AllowMethods: "*",
 		},
 	))
-
-	viper.SetDefault("PORT", "3000")
 
 	app.Listen(":" + viper.GetString("PORT"))
 }
