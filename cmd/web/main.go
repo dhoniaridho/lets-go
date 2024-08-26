@@ -3,18 +3,19 @@ package main
 import (
 	_ "backend/docs"
 	"backend/internal/config"
-	"log"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/joho/godotenv"
+	"github.com/spf13/viper"
 )
 
 func main() {
 
-	// Load environment variables from .env file
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+	viper.SetConfigFile(".env")
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil {             // Handle errors reading the config file
+		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
 	app := fiber.New(
@@ -45,5 +46,7 @@ func main() {
 		},
 	))
 
-	app.Listen(":2000")
+	viper.SetDefault("PORT", "3000")
+
+	app.Listen(":" + viper.GetString("PORT"))
 }

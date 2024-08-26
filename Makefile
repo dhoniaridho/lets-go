@@ -1,12 +1,15 @@
-include .env
-
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
 run:
 	air
 
 build-web:
-	go build -o dist/app.exe cmd/web/main.go
+	go build -o dist/main.exe cmd/web/main.go
 
 migrate:
+	go install github.com/pressly/goose/v3/cmd/goose@latest
 	goose -dir ./db/migrations postgres $(DB_URL) up
 
 migrate-down:

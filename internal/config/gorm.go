@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -23,7 +24,7 @@ func NewDatabase() *gorm.DB {
 		},
 	)
 
-	db, err := gorm.Open(postgres.Open("postgres://postgres:postgresql@localhost:5432/postgres?sslmode=disable"), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(viper.GetString("DB_URL")), &gorm.Config{
 		Logger: newLogger,
 	})
 

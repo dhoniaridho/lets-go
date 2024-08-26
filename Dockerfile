@@ -1,19 +1,27 @@
-FROM golang:1.19-alpine3.17 AS builder
+FROM golang:1.22-alpine3.20 AS builder
 
 WORKDIR /app
+
+ENV GO111MODULE=on
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+ENV GOARCH=amd64
+ENV PORT=3000
 
 RUN apk add make
-COPY go.mod go.sum ./
-RUN go mod download
-
 COPY . .
+RUN go mod download
+RUN make build-web
 
-RUN make build
+FROM golang:1.22-alpine3.20 AS runner
 
-FROM alpine:3.17 AS runner
 
 WORKDIR /app
-
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 COPY --from=builder /app/dist ./
+COPY db db
+COPY docker/entrypoint/run.sh /app/run.sh
+RUN chmod +x ./run.sh
 
-CMD ["./main.exe"]
+ENTRYPOINT [ "./run.sh" ]
+EXPOSE 3000
