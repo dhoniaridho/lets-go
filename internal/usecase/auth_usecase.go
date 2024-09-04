@@ -38,7 +38,12 @@ func (u *AuthUsecase) SignIn(data *models.SignInRequest) (*models.SignInResponse
 		)
 	}
 
-	token, err := jwt.Sign()
+	token, err := jwt.Sign(
+		jwt.Claims{
+			UserID:   user.ID,
+			Username: user.Name,
+		},
+	)
 
 	if err != nil {
 		return nil, err
@@ -93,8 +98,13 @@ func (u *AuthUsecase) SignUp(
 	return data, nil
 }
 
-func (u *AuthUsecase) GetProfile(id string) (*entities.User, error) {
+func (u *AuthUsecase) GetProfile(id string) (*models.User, error) {
 	user := new(entities.User)
 	err := u.UserRepository.First(user, map[string]interface{}{"id": id})
-	return user, err
+	return &models.User{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	}, err
 }

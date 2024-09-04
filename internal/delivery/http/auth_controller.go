@@ -1,6 +1,7 @@
 package http
 
 import (
+	"backend/internal/delivery/http/middleware"
 	"backend/internal/models"
 	"backend/internal/usecase"
 	"backend/internal/utils"
@@ -84,9 +85,24 @@ func (c *AuthController) SignUp(ctx *fiber.Ctx) error {
 
 func (c *AuthController) GetProfile(ctx *fiber.Ctx) error {
 
+	auth := middleware.GetUser(ctx)
+
+	user, err := c.UseCase.GetProfile(auth.UserID)
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(
+			utils.Response{
+				Data:    nil,
+				Message: err.Error(),
+				Status:  fiber.StatusBadRequest,
+				Errors:  []utils.ErrorResponse{},
+			},
+		)
+	}
+
 	return ctx.Status(fiber.StatusOK).JSON(
 		utils.Response{
-			Data:    nil,
+			Data:    user,
 			Message: "success",
 			Status:  fiber.StatusOK,
 		},

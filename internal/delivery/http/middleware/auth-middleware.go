@@ -31,8 +31,27 @@ func NewAuth() fiber.Handler {
 			})
 		}
 
-		ctx.Locals("auth", data)
+		// get jwt claims
+		claims, ok := data.Get("claims")
+		if !ok {
+			// handle the case where the key was not found
+			return ctx.Status(fiber.StatusUnauthorized).JSON(&utils.Response{
+				Status:  fiber.StatusUnauthorized,
+				Message: "Unauthorized",
+				Data:    nil,
+			})
+		}
 
+		claimsMap := claims.(map[string]interface{})
+
+		ctx.Locals("auth", &jwt.Claims{
+			UserID:   claimsMap["userId"].(string),
+			Username: claimsMap["username"].(string),
+		})
 		return ctx.Next()
 	}
+}
+
+func GetUser(ctx *fiber.Ctx) *jwt.Claims {
+	return ctx.Locals("auth").(*jwt.Claims)
 }

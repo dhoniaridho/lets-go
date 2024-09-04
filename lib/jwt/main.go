@@ -4,16 +4,23 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/spf13/viper"
 )
 
-func Sign() (string, error) {
+// Claims represents the payload of the JWT
+type Claims struct {
+	UserID   string `json:"userId"`
+	Username string `json:"username"`
+	// Add other fields as needed
+}
+
+func Sign(claims Claims) (string, error) {
 
 	// Load environment variables from .env file
 	if err := godotenv.Load(); err != nil {
@@ -21,8 +28,8 @@ func Sign() (string, error) {
 	}
 
 	// Load the JWKs from environment variables
-	jwkPublicBase64 := os.Getenv("JWK_PUBLIC")
-	jwkPrivateBase64 := os.Getenv("JWK_PRIVATE")
+	jwkPublicBase64 := viper.GetString("JWK_PUBLIC")
+	jwkPrivateBase64 := viper.GetString("JWK_PRIVATE")
 
 	if jwkPublicBase64 == "" || jwkPrivateBase64 == "" {
 		log.Fatal("Environment variables JWK_PUBLIC or JWK_PRIVATE are not set")
@@ -37,7 +44,7 @@ func Sign() (string, error) {
 		log.Fatalf("Failed to parse private JWK: %v", err)
 	}
 	// Build a JWT!
-	tok, err := jwt.NewBuilder().
+	tok, err := jwt.NewBuilder().Claim("claims", claims).
 		Issuer(`github.com/lestrrat-go/jwx`).
 		IssuedAt(time.Now()).
 		Build()
@@ -60,7 +67,7 @@ func Sign() (string, error) {
 // verify function to validate JWT using JWK
 func Verify(tokenString string) (jwt.Token, error) {
 
-	jwkPublicBase64 := os.Getenv("JWK_PUBLIC")
+	jwkPublicBase64 := viper.GetString("JWK_PUBLIC")
 
 	// Decode the Base64-encoded JWK
 	jwkPublicJSON, err := base64.StdEncoding.DecodeString(jwkPublicBase64)
